@@ -1,0 +1,15 @@
+Current Progress Made:
+-- reading in works, with ft_split up and running
+-- no error checking yet, later
+-- no execution stage, but is mostly done from pipex
+
+What's Left?:
+-- error checks for input
+-- execution stage implementation (shouldn't take long)
+-- flags and stuff still needed (<, <<, >, >> etc) (copy from pipex mostly)
+-- environmental bash variables (via hashtable maybe?)
+-- signals and stuff (idk how its gonna work, maybe git it if google and playing around turn up nothing?)
+
+estimated time left roughly:
+50 hours maybe? thats including some major bugs and stuff popping up
+optimally maybe 20ish
