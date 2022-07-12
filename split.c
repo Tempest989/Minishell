@@ -67,6 +67,7 @@ int	ft_assign(t_data *data, char *input)
 		}
 		if (track - last > 0)
 		{
+			// printf("words = %d, allocated = %d\n", words, track - last + 1);
 			data->command[words] = malloc(sizeof(char) * (track - last + 1));
 			if (data->command[words] == NULL)
 			{
@@ -80,6 +81,7 @@ int	ft_assign(t_data *data, char *input)
 				temp++;
 			}
 			data->command[words][temp - last] = '\0';
+			// printf("words = %d, temp = %d\n", words, temp - last);
 		}
 	}
 	data->command[words + 1] = NULL;
@@ -88,7 +90,9 @@ int	ft_assign(t_data *data, char *input)
 
 int	ft_split(t_data *data, char *input)
 {
-	data->command = malloc(sizeof(char) * ft_count(input));
+	int count = ft_count(input);
+	// printf("count = %d\n", count);
+	data->command = malloc(sizeof(char *) * count);
 	if (data->command == NULL)
 	{
 		printf("malloc error\n");

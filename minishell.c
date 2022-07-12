@@ -10,53 +10,60 @@
 
 // }
 
-int	ft_reading(t_data *data)
-{
-	char	*line;
-	char	current_dir[PATH_MAX + 2];
-
-	if (getcwd(current_dir, sizeof(current_dir)) == NULL)
-	{
-		perror("getcwd() error");
-		return (-1);
-	}
-	int track = 0;
-	while (current_dir[track])
-		track++;
-	current_dir[track] = ':';
-	current_dir[track + 1] = ' ';
-	current_dir[track + 2] = '\0';
-	line = readline(current_dir);
-	if (line[0] == '\0')
-	{
-		printf("line empty\n");
-		free(line);
-		return (-1);
-	}
-	int num = ft_split(data, line);
-	for (int i = 0; i <= num; i++)
-	{
-		printf("%d: :%s:\n", i, data->command[i]);
-		free(data->command[i]);
-	}
-	free(data->command);
-	// printf("%s", line);
-	add_history(line);
-	free(line);
-	return (1);
-}
-
 int	main()
 {
 	t_data	data;
 	int		result;
+	
 	while (1)
 	{
+		data.is_pipe = -1;
+		data.command_num = 0;
+		data.in_out_fd[0] = -1;
+		data.in_out_fd[1] = -1;
+		data.in_out_fd[2] = -1;
+		data.in_out_fd[3] = -1;
 		result = ft_reading(&data);
-		// if (result == 1)
-		// 	ft_execute(data);
+		// if (result > 0)
+		// 	result = ft_execute(&data);
 		if (result == -1)
 			break ;
+		if (data.in_out_fd[0] != -1)
+		{
+			dprintf(2, "closing input file descriptor\n");
+			if (close(data.in_out_fd[0]))
+			{
+				perror("close");
+			}
+			dup2(data.in_out_fd[4], 0);
+		}
+		if (data.in_out_fd[1] != -1)
+		{
+			dprintf(2, "closing output file descriptor\n");
+			// close(data.in_out_fd[1]);
+			if (close(data.in_out_fd[1]))
+			{
+				perror("close");
+			}
+			dup2(data.in_out_fd[5], 1);
+		}
+		if (data.in_out_fd[0] != -1 && ft_strcmp(data.command[data.in_out_fd[2]], "<<") == 'y')
+		{
+			dprintf(2, "unlink calling\n");
+			if (unlink(".temp"))
+			{
+				perror("unlink");
+			}
+		}
+		dprintf(2, "in = %d out = %d\n", data.in_out_fd[0], data.in_out_fd[1]);
+		for (int i = 0; i <= data.command_num; i++)
+			dprintf(2, "%d: :%s:\n", i, data.command[i]);
+		for (int i = 0; i <= data.command_num; i++)
+		{
+			dprintf(2, "%d: :%s:\n", i, data.command[i]);
+			free(data.command[i]);
+		}
+		free(data.command);
 	}
 	// ft_data_destructor(data);
 	rl_clear_history();
