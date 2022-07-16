@@ -7,10 +7,7 @@ int	ft_double_left_arrow(t_data *data)
 
 	data->in_out_fd[0] = open(".temp", O_WRONLY | O_CREAT, 0644);
 	if (data->in_out_fd[0] < 0)
-	{
-		dprintf(2, "open error <<\n");
-		return (-1);
-	}
+		ft_data_destructor(data, -1, NULL);
 	while (1)
 	{
 		input = readline("> ");
@@ -29,9 +26,6 @@ int	ft_double_left_arrow(t_data *data)
 	close(data->in_out_fd[0]);
 	data->in_out_fd[0] = open(".temp", O_RDONLY);
 	if (data->in_out_fd[0] < 0)
-	{
-		dprintf(2, "open error <<2\n");
-		return (-1);
-	}
+		ft_data_destructor(data, -1, NULL);
 	return (1);
 }

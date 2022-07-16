@@ -1,71 +1,90 @@
 #include "minishell.h"
 
-// void	ft_data_destructor(t_data data)
-// {
+void	ft_data_destructor(t_data *data, int flag, char *message)
+{
+	int	track;
 
-// }
+	if (data->pipe_locale != NULL)
+		free(data->pipe_locale);
+	track = 0;
+	while (data->command != NULL && data->command[track] != NULL)
+		free(data->command[track++]);
+	if (data->command != NULL)
+		free(data->command);
+	if (message != NULL)
+	{
+		track = 0;
+		while (message[track++] != '\0');
+		write(2, message, track);
+	}
+	if (flag == -2)
+		return ;
+	else if (flag == -1)
+	{
+		perror("Minishell: ");
+		exit(errno);
+	}
+	else
+		exit(flag);
+}
 
-// void	ft_execute(t_data data)
-// {
+void	ft_close_files(t_data *data)
+{
+	if (data->in_out_fd[0] != -1)
+	{
+		close(data->in_out_fd[0]);
+		if (dup2(data->in_out_fd[4], 0) < 0)
+			ft_data_destructor(data, -1, NULL);
+	}
+	if (data->in_out_fd[1] != -1)
+	{
+		close(data->in_out_fd[1]);
+		if (dup2(data->in_out_fd[5], 1) < 0)
+			ft_data_destructor(data, -1, NULL);
+	}
+	if (data->in_out_fd[0] != -1 && ft_strcmp(data->command[data->in_out_fd[2]], "<<") == 'y')
+	{
+		if (unlink(".temp") < 0)
+			ft_data_destructor(data, -1, NULL);
+	}
+}
 
-// }
+void	ft_initialize(t_data *data)
+{
+	data->is_pipe = 0;
+	data->pipe_locale = NULL;
+	data->command_num = 0;
+	data->command = NULL;
+	data->in_out_fd[0] = -1;
+	data->in_out_fd[1] = -1;
+	data->in_out_fd[2] = -1;
+	data->in_out_fd[3] = -1;
+	data->in_out_fd[4] = -1;
+	data->in_out_fd[5] = -1;
+}
 
-int	main()
+int	main(int result, char *av[], char *ev[])
 {
 	t_data	data;
-	int		result;
-	
+
+	av[0] = NULL;
 	while (1)
 	{
-		data.is_pipe = -1;
-		data.command_num = 0;
-		data.in_out_fd[0] = -1;
-		data.in_out_fd[1] = -1;
-		data.in_out_fd[2] = -1;
-		data.in_out_fd[3] = -1;
+		ft_initialize(&data);
 		result = ft_reading(&data);
-		// if (result > 0)
-		// 	result = ft_execute(&data);
+		if (result > 0)
+			result = ft_execute(&data, ev);
 		if (result == -1)
 			break ;
-		if (data.in_out_fd[0] != -1)
+		else if (result > 0)
 		{
-			dprintf(2, "closing input file descriptor\n");
-			if (close(data.in_out_fd[0]))
-			{
-				perror("close");
-			}
-			dup2(data.in_out_fd[4], 0);
+			ft_close_files(&data);
+			ft_data_destructor(&data, -2, NULL);
 		}
-		if (data.in_out_fd[1] != -1)
-		{
-			dprintf(2, "closing output file descriptor\n");
-			// close(data.in_out_fd[1]);
-			if (close(data.in_out_fd[1]))
-			{
-				perror("close");
-			}
-			dup2(data.in_out_fd[5], 1);
-		}
-		if (data.in_out_fd[0] != -1 && ft_strcmp(data.command[data.in_out_fd[2]], "<<") == 'y')
-		{
-			dprintf(2, "unlink calling\n");
-			if (unlink(".temp"))
-			{
-				perror("unlink");
-			}
-		}
-		dprintf(2, "in = %d out = %d\n", data.in_out_fd[0], data.in_out_fd[1]);
-		for (int i = 0; i <= data.command_num; i++)
-			dprintf(2, "%d: :%s:\n", i, data.command[i]);
-		for (int i = 0; i <= data.command_num; i++)
-		{
-			dprintf(2, "%d: :%s:\n", i, data.command[i]);
-			free(data.command[i]);
-		}
-		free(data.command);
 	}
-	// ft_data_destructor(data);
+	// dprintf(2, "before destructor\n");
+	ft_data_destructor(&data, -2, NULL);
+	// dprintf(2, "here\n");
 	rl_clear_history();
 	return (0);
 }

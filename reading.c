@@ -12,34 +12,61 @@ char	ft_strcmp(const char *str1, const char *str2)
 	return ('n');
 }
 
-int	ft_left_arrows(t_data *data)
+int	ft_arrow_loop(t_data *data, char *first, char *second, int flag)
 {
 	int	track;
 
 	track = 0;
-	while (data->command[track] != NULL && ft_strcmp(data->command[track], "<") == 'n')
-		track++;
-	if (data->command[track] != NULL && track != 0 && (data->is_pipe == -1 || (data->is_pipe != -1 && track < data->is_pipe)))
+	while (data->command[track] != NULL)
 	{
-		data->in_out_fd[4] = dup(0);
-		data->in_out_fd[0] = open(data->command[track + 1], O_RDONLY);
-		if (data->in_out_fd[0] == -1)
+		if (ft_strcmp(data->command[track], first) == 'y' || ft_strcmp(data->command[track], second) == 'y')
 		{
-			dprintf(2, "open errro <\n");
-			return (-1);
+			if ((flag == 1 && data->in_out_fd[2] != -1) || data->in_out_fd[3] != -1)
+			{
+				if (flag == 1)
+					dprintf(2, "left");
+				else
+					dprintf(2, "right");
+				dprintf(2, " double error track = %d\n", track);
+				return (0);
+			}
+			if (flag == 1)
+				data->in_out_fd[2] = track;
+			else
+				data->in_out_fd[3] = track;
+			if (data->pipe_locale != NULL && ((flag == 1 && track > data->pipe_locale[0]) || (flag != 1 && track < data->pipe_locale[data->is_pipe - 1])))
+			{
+				if (flag == 1)
+					dprintf(2, "left");
+				else
+					dprintf(2, "right");
+				dprintf(2, " arrow after pipe\n");
+				dprintf(2, "pipe_locale = %d, track = %d\n", data->pipe_locale[0], track);
+				return (0);
+			}
 		}
-		data->in_out_fd[2] = track;
-		dprintf(2, "str = %s\n", data->command[track]);
-	}
-	else if (track == 0 || (data->is_pipe != -1 && track > data->is_pipe))
-	{
-		dprintf(2, "first left error track = %d\n", track);
-		return (0);
-	}
-	track = 0;
-	while (data->command[track] != NULL && ft_strcmp(data->command[track], "<<") == 'n')
 		track++;
-	if (data->command[track] != NULL && track != 0 && data->in_out_fd[0] == -1 && (data->is_pipe == -1 || (data->is_pipe != -1 && track < data->is_pipe)))
+	}
+	return (1);
+}
+
+int	ft_left_arrows(t_data *data)
+{
+	if (ft_arrow_loop(data, "<", "<<", 1) == 0)
+		return (0);
+	if (data->in_out_fd[2] == -1)
+		return (1);
+	data->in_out_fd[4] = dup(0);
+	if (data->in_out_fd[4] < 0)
+		ft_data_destructor(data, -1, NULL);
+	if (ft_strcmp(data->command[data->in_out_fd[2]], "<") == 'y')
+	{
+		data->in_out_fd[0] = open(data->command[data->in_out_fd[2] + 1], O_RDONLY);
+		if (data->in_out_fd[0] == -1)
+			ft_data_destructor(data, -1, NULL);
+		dprintf(2, "str = %s\n", data->command[data->in_out_fd[2]]);
+	}
+	else
 	{
 		// data->in_out_fd[0] = open(data->command[track + 1], O_RDWR);
 		// if (data->in_out_fd[0] == -1)
@@ -47,102 +74,94 @@ int	ft_left_arrows(t_data *data)
 		// 	dprintf(2, "open errro >\n");
 		// 	return (-2);
 		// }
-		data->in_out_fd[2] = track;
-		dprintf(2, "str = %s\n", data->command[track]);
-		data->in_out_fd[4] = dup(0);
+		dprintf(2, "str = %s\n", data->command[data->in_out_fd[2]]);
 		if (ft_double_left_arrow(data) < 0)
 		{
 			dprintf(2, "double left doing error\n");
 			return (-1);
 		}
 	}
-	else if (track == 0 || (data->in_out_fd[0] != -1 && data->command[track] != NULL) || (data->is_pipe != -1 && track > data->is_pipe))
-	{
-		dprintf(2, "double left error\n");
-		return (0);
-	}
 	return (1);
 }
 
 int	ft_right_arrows(t_data *data)
 {
+	if (ft_arrow_loop(data, ">", ">>", 0) == 0)
+		return (0);
+	if (data->in_out_fd[3] == -1)
+		return (1);
+	data->in_out_fd[5] = dup(1);
+	if (data->in_out_fd[5] < 0)
+		ft_data_destructor(data, -1, NULL);
+	if (ft_strcmp(data->command[data->in_out_fd[3]], ">") == 'y')
+		data->in_out_fd[1] = open(data->command[data->in_out_fd[3] + 1], O_WRONLY | O_CREAT, 0644);
+	else
+		data->in_out_fd[1] = open(data->command[data->in_out_fd[3] + 1], O_WRONLY | O_APPEND | O_CREAT, 0644);
+	if (data->in_out_fd[1] == -1)
+		ft_data_destructor(data, -1, NULL);
+	return (1);
+}
+
+int	ft_pipe_checks(t_data *data)
+{
 	int	track;
 
 	track = 0;
-	while (data->command[track] != NULL && ft_strcmp(data->command[track], ">") == 'n')
-		track++;
-	if (data->command[track] != NULL && track != 0 && track > data->is_pipe && track > data->in_out_fd[2])
+	while (data->command[track] != NULL)
 	{
-		data->in_out_fd[5] = dup(1);
-		data->in_out_fd[1] = open(data->command[track + 1], O_WRONLY | O_CREAT, 0644);
-		if (data->in_out_fd[1] == -1)
+		if (ft_strcmp(data->command[track], "|") == 'y')
 		{
-			dprintf(2, "open errro >\n");
-			return (-1);
+			if (track == 0)
+			{
+				dprintf(2, "0 | error\n");
+				return (0);
+			}
+			else if (data->command[track + 1] == NULL)
+			{
+				dprintf(2, "command not found\n");
+				return (0);
+			}
+			data->is_pipe++;
 		}
-		data->in_out_fd[3] = track;
+		track++;
 	}
-	else if (track == 0 || (data->is_pipe != -1 && track < data->is_pipe) || track < data->in_out_fd[2])
-	{
-		dprintf(2, "first right error\n");
-		return (0);
-	}
+	if (data->is_pipe == 0)
+		return (1);
+	data->pipe_locale = malloc(sizeof(int) * (data->is_pipe + 1));
+	if (data->pipe_locale == NULL)
+		ft_data_destructor(data, -1, NULL);
+	data->is_pipe = 0;
 	track = 0;
-	while (data->command[track] != NULL && ft_strcmp(data->command[track], ">>") == 'n')
-		track++;
-	if (data->command[track] != NULL && track != 0 && data->in_out_fd[1] == -1 && track > data->is_pipe)
+	while (data->command[track] != NULL)
 	{
-		data->in_out_fd[5] = dup(1);
-		data->in_out_fd[1] = open(data->command[track + 1], O_WRONLY | O_APPEND | O_CREAT, 0644);
-		if (data->in_out_fd[1] == -1)
+		if (ft_strcmp(data->command[track], "|") == 'y')
 		{
-			dprintf(2, "open errro >>\n");
-			return (-1);
+			data->pipe_locale[data->is_pipe] = track;
+			data->is_pipe++;
 		}
-		data->in_out_fd[3] = track;
+		track++;
 	}
-	else if (track == 0 || (data->in_out_fd[1] != -1 && data->command[track] != NULL) || (data->is_pipe != -1 && track < data->is_pipe) || track < data->in_out_fd[2])
-	{
-		dprintf(2, "double right error\n");
-		return (0);
-	}
+	data->pipe_locale[data->is_pipe] = -1;
 	return (1);
 }
 
 int	ft_analyse_input(t_data *data)
 {
-	int	track;
+	int	check;
 
-	track = 0;
-	while (data->command[track] != NULL && ft_strcmp(data->command[track], "|") == 'n')
-		track++;
-	if (data->command[track] != NULL && track != 0)
-		data->is_pipe = track;
-	else if (track == 0)
-	{
-		dprintf(2, "pipe error\n");
-		return (0);
-	}
-	int check = ft_left_arrows(data);
-	if (check == 0)
-		return (0);
-	else if (check == -1)
-		return (-1);
+	check = ft_pipe_checks(data);
+	if (check <= 0)
+		return (check);
+	check = ft_left_arrows(data);
+	if (check <= 0)
+		return (check);
 	check = ft_right_arrows(data);
-	if (check == 0)
-		return (0);
-	else if (check == -1)
-		return (-1);
+	if (check <= 0)
+		return (check);
 	if (data->in_out_fd[0] != -1 && dup2(data->in_out_fd[0], 0) < 0)
-	{
-		dprintf(2, "dup2 error\n");
-		return (-1);
-	}
+		ft_data_destructor(data, -1, NULL);
 	if (data->in_out_fd[1] != -1 && dup2(data->in_out_fd[1], 1) < 0)
-	{
-		dprintf(2, "dup2 error\n");
-		return (-1);
-	}
+		ft_data_destructor(data, -1, NULL);
 	// if (data->in_out_fd[0] != -1)
 	// {
 	// 	char temp[5];
@@ -177,11 +196,31 @@ int	ft_reading(t_data *data)
 	current_dir[track + 1] = ' ';
 	current_dir[track + 2] = '\0';
 	line = readline(current_dir);
+	// track = 0;
+	// printf("%s",current_dir);
+	// for (int i = 0; i < 101; i++)
+	// 	line[i] = 0;
+	// fgets(line, 100, stdin);
+	// for (int i = 0; line[i] != '\0'; i++)
+	// {
+	// 	if (line[i] == '\n')
+	// 	{
+	// 		line[i] = '\0';
+	// 		break;
+	// 	}
+	// }
+	// printf("line = :%s:\n", line);
 	if (line[0] == '\0')
 	{
 		dprintf(2, "line empty\n");
 		free(line);
 		return (0);
+	}
+	if (ft_strcmp(line, "exit") == 'y')
+	{
+		dprintf(2, "exiting...\n");
+		free(line);
+		return (-1);
 	}
 	data->command_num = ft_split(data, line);
 	add_history(line);
