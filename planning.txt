@@ -1,14 +1,14 @@
 Current Progress Made:
--- reading in works, with ft_split up and running
--- no error checking yet, later
--- no execution stage, but is mostly done from pipex
+-- reading in and running commands is done, including pipes, should be able to multiple pipes?
+-- basic error checks for >, <, << and >>, and their interactions with |.
 
 What's Left?:
--- error checks for input
--- execution stage implementation (shouldn't take long)
--- flags and stuff still needed (<, <<, >, >> etc) (copy from pipex mostly)
--- environmental bash variables (via hashtable maybe?)
+-- error checks for input (SHOULD BE MOSTLY DONE)
+-- environment bash variables (Linked List probs)
+-- need to add more input checks to insert environment variables in when they r required, (Handle the ' and " characters correctly)
 -- signals and stuff (idk how its gonna work, maybe git it if google and playing around turn up nothing?)
+-- Signals should occur before the main readline function call, and then revert back to normal directly after that same readline call.
+-- Have idea about how ctrl+c and ctrl+\ should work, but ctrl+D is a nightmare since it does actaully send a signal, google for more info.
 
 estimated time left roughly:
 50 hours maybe? thats including some major bugs and stuff popping up
