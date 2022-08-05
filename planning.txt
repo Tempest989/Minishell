@@ -11,6 +11,7 @@ What's Left?:
 -- signals and stuff (idk how its gonna work, maybe git it if google and playing around turn up nothing?)
 -- Signals should occur before the main readline function call, and then revert back to normal directly after that same readline call.
 -- Have idea about how ctrl+c and ctrl+\ should work, but ctrl+D is a nightmare since it does actaully send a signal, google for more info.
+-- MAKE	SURE ALL IMPLEMENTATIONS FOR SIGNAL FUNCTIONS ARE SIGNAL SAFE!!!! (google for info on the other functions u can use within these signal functions safely).
 
 -- Build all builtin functions and either create them as executables or include another checking function to run these functions different to all other commands.
 
