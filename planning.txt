@@ -4,11 +4,15 @@ Current Progress Made:
 
 What's Left?:
 -- error checks for input (SHOULD BE MOSTLY DONE)
+
 -- environment bash variables (Linked List probs)
 -- need to add more input checks to insert environment variables in when they r required, (Handle the ' and " characters correctly)
+
 -- signals and stuff (idk how its gonna work, maybe git it if google and playing around turn up nothing?)
 -- Signals should occur before the main readline function call, and then revert back to normal directly after that same readline call.
 -- Have idea about how ctrl+c and ctrl+\ should work, but ctrl+D is a nightmare since it does actaully send a signal, google for more info.
+
+-- Build all builtin functions and either create them as executables or include another checking function to run these functions different to all other commands.
 
 estimated time left roughly:
 50 hours maybe? thats including some major bugs and stuff popping up
