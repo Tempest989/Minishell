@@ -6,6 +6,18 @@ void	ft_data_destructor(t_data *data, int flag, char *message)
 
 	if (data->pipe_locale != NULL)
 		free(data->pipe_locale);
+	for (int i = 0; i < 128; i++)
+	{
+		while (data->table[i] != NULL)
+		{
+			t_list *temp = data->table[i]->next;
+			free(data->table[i]->key);
+			free(data->table[i]->value);
+			temp = data->table[i]->next;
+			free(data->table[i]);
+			data->table[i] = temp;
+		}
+	}
 	track = 0;
 	while (data->command != NULL && data->command[track] != NULL)
 		free(data->command[track++]);
@@ -61,6 +73,9 @@ void	ft_initialize(t_data *data)
 	data->in_out_fd[3] = -1;
 	data->in_out_fd[4] = -1;
 	data->in_out_fd[5] = -1;
+	data->table = malloc(sizeof(t_list *) * (128));
+	for (int i = 0; i < 128; i++)
+		data->table[i] = NULL;
 }
 
 int	main(int result, char *av[], char *ev[])
@@ -68,6 +83,8 @@ int	main(int result, char *av[], char *ev[])
 	t_data	data;
 
 	av[0] = NULL;
+	// data.new[0].sa_handler = ft_ctrl_c_handler;
+	// data.new[1].sa_handler = ft_ctrl_back_slash_handler;
 	while (1)
 	{
 		ft_initialize(&data);

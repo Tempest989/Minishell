@@ -3,7 +3,7 @@
 NAME = minishell
 
 all:
-	gcc -Wall -Werror -Wextra minishell.c split.c reading.c double_left.c bin_path.c execute.c -lreadline -o $(NAME)
+	gcc -Wall -Werror -Wextra minishell.c split.c reading.c double_left.c bin_path.c execute.c signals.c hashtable.c environ_checks.c -lreadline -o $(NAME)
 
 $(NAME): all
 

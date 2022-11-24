@@ -8,6 +8,8 @@ int	ft_find(char *input, int start, char locate)
 			return (start);
 		start++;
 	}
+	if (locate == '\0')
+		return (start);
 	return (-1);
 }
 

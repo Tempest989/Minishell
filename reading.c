@@ -149,6 +149,9 @@ int	ft_analyse_input(t_data *data)
 {
 	int	check;
 
+	check = ft_environ_checks(data, NULL);
+	if (check != 0)
+		return (check);
 	check = ft_pipe_checks(data);
 	if (check <= 0)
 		return (check);
@@ -182,19 +185,23 @@ int	ft_analyse_input(t_data *data)
 int	ft_reading(t_data *data)
 {
 	char	*line;
-	char	current_dir[PATH_MAX + 2];
+	char	current_dir[PATH_MAX + 3];
 
 	if (getcwd(current_dir, sizeof(current_dir)) == NULL)
 	{
 		perror("getcwd() error");
 		return (-1);
 	}
+	// printf("output = %s\n", current_dir);
 	int track = 0;
-	while (current_dir[track])
-		track++;
-	current_dir[track] = ':';
-	current_dir[track + 1] = ' ';
-	current_dir[track + 2] = '\0';
+	while (current_dir[track++]);
+	current_dir[track - 1] = ':';
+	current_dir[track] = ' ';
+	current_dir[track + 1] = '\0';
+	// printf("output = %s\n", current_dir);
+	// sigaction(SIGINT, data->new[0], data->old[0]);
+	// sigaction(SIGQUIT, data->new[1], data->old[1]);
+	// sigaction(SIG)										/// put signal shit here, can handle all signals i think, need to detect ctrl+d, then can place SIGINt signal there for new signal
 	line = readline(current_dir);
 	// track = 0;
 	// printf("%s",current_dir);
@@ -210,7 +217,7 @@ int	ft_reading(t_data *data)
 	// 	}
 	// }
 	// printf("line = :%s:\n", line);
-	if (line[0] == '\0')
+	if (line == NULL || line[0] == '\0')
 	{
 		dprintf(2, "line empty\n");
 		free(line);
