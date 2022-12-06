@@ -2,8 +2,8 @@
 
 int	ft_$_find(char *input, int start, char locate, int temp)
 {
-	printf("\nlocate = %c, input starting char = %c\n", locate, input[start]);
-	printf("input = %s :: %d\n\n", input, start);
+	// printf("\nlocate = %c, input starting char = %c\n", locate, input[start]);
+	// printf("input = %s :: %d\n\n", input, start);
 	while (input[start])
 	{
 		if (input[start] == '\'')
@@ -27,9 +27,9 @@ char	*ft_environ_scan(char *input, char *output, t_data *data)
 	int start = 0;
 	while (input[start])
 		start++;
-	printf("before output malloc %d\n", start);
+	// printf("before output malloc %d\n", start);
 	output = malloc(sizeof(char) * (start + 1));
-	printf("after output malloc\n");
+	// printf("after output malloc\n");
 	if (output == NULL)
 		return (NULL);
 	start = -1;
@@ -37,15 +37,15 @@ char	*ft_environ_scan(char *input, char *output, t_data *data)
 		output[start] = input[start];
 	output[start] = '\0';
 	start = 0;
-	printf("output = %s\n", output);
+	// printf("output = %s\n", output);
 	while (1)
 	{
-		printf("length check\n");
+		// printf("length check\n");
 		int length = ft_$_find(output, start, '$', 0);
-		printf("length = %d\n", length);
+		// printf("length = %d\n", length);
 		if (length < 0)
 			break;
-		printf("pass length check\n");
+		// printf("pass length check\n");
 		int track = ft_find(output, 0, '\0');
 		int key = ft_find(output, length, ' ');
 		if (key == -1)
@@ -53,7 +53,7 @@ char	*ft_environ_scan(char *input, char *output, t_data *data)
 		char *new = malloc(sizeof(char) * (key + 1));
 		if (new == NULL)
 			return (NULL);
-		printf("key num = %d\n", key);
+		// printf("key num = %d\n", key);
 		int temp = 0;
 		while (output[length + temp + 1] && output[length + temp + 1] != ' ')
 		{
@@ -62,14 +62,14 @@ char	*ft_environ_scan(char *input, char *output, t_data *data)
 		}
 		new[temp] = '\0';
 		int error = 0;
-		printf("new = %s\n", new);
+		// printf("new = %s\n", new);
 		char *value = ft_search_table(data, new, &error);
 		free(new);
 		if (value == NULL && error == -1)
 			return (NULL);
 		else if (value == NULL)
 		{
-			printf("hit the continue\n");
+			// printf("hit the continue\n");
 			start = length + 1;
 			continue;
 		}
@@ -88,9 +88,10 @@ char	*ft_environ_scan(char *input, char *output, t_data *data)
 			next[error++] = output[key];
 		next[error] = '\0';
 		free(output);
+		free(value);
 		output = next;
 	}
-	printf("returning from environ scan\n");
+	// printf("returning from environ scan\n");
 	return (output);
 }
 
@@ -102,40 +103,42 @@ int	ft_environ_checks(t_data *data, char *check)
 		int temp2 = ft_find(data->command[i], 1, ' ');
 		if (data->command[i][0] == '$' && (temp1 < temp2 || (temp1 > 0 && temp2 == -1))) 
 		{
-			printf("inside if statement =\n");
+			// printf("inside if statement =\n");
 			int track = 1;
 			while (data->command[i][track] != '=')
 				track++;
+			// printf("before malloc key\n");
 			char *key = malloc(sizeof(char) * track);
 			if (key == NULL)
 				return (-2);
-			track = -1;
+			track = 0;
 			while (data->command[i][++track] != '=')
 				key[track - 1] = data->command[i][track];
 			key[track - 1] = '\0';
-			printf("key = %s\n", key);
+			// printf("key = %s\n", key);
 			char *value = ft_environ_scan(&data->command[i][track + 1], NULL, data);
 			if (value == NULL)
 			{
 				free(key);
 				return (-2);
 			}
-			printf("value = %s\nbefore add table\n", value);
+			// printf("value = %s\nbefore add table\n", value);
 			int output = ft_add_table(data, key, value);
 			// printf("after add table\n");
-			// free(value);
+			free(value);
+			free(key);
 			// printf("free-ing key\n");
-			printf("\noutput = %d\n", output);
+			// printf("\noutput = %d\n", output);
 			if (output < 0)
 				return (output);
-			printf("\n\ncommands currently:\n");
-			for(int k = 0; k < data->command_num; k++)
-				printf("%s\n", data->command[k]);
+			// printf("\n\ncommands currently:\n");
+			// for(int k = 0; k < data->command_num; k++)
+			// 	printf("%s\n", data->command[k]);
 			free(data->command[i]);
 			data->command[i] = NULL;
+			// printf("before return 2 for command_num == 1\n");
 			if (data->command_num == 1)
 				return (2);
-			
 			output = i;
 			while (output <= data->command_num)
 			{
@@ -145,21 +148,23 @@ int	ft_environ_checks(t_data *data, char *check)
 			data->command_num--;
 			// free(data->command[output + 1]);
 			// data->command[output] = NULL;
-			printf("\n\ncommands currently:\n");
-			for(int k = 0; k < data->command_num; k++)
-				printf("%s\n", data->command[k]);
+			// printf("\n\ncommands currently:\n");
+			// for(int k = 0; k < data->command_num; k++)
+			// 	printf("%s\n", data->command[k]);
 			i--;
 		}
-		else
+		else if (ft_$_find(data->command[i], 0, '$', 0) >= 0)
 		{
-			printf("here\n");
+			// printf("here\n");
 			check = ft_environ_scan(data->command[i], NULL, data);
+			// printf("check == NULL.....\n");
 			if (check == NULL)
 				return (-2);
-			printf("check = %s\n", check);
+			// printf("check = %s\n", check);
 			free(data->command[i]);
 			data->command[i] = check;
 		}
+		// printf("\n\n\nnext command\n\n\n");
 	}
 	return (0);
 }

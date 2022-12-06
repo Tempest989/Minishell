@@ -8,6 +8,7 @@ char	*ft_search_table(t_data *data, char *key, int *error)
 
 	if (key == NULL)
 		return (NULL);
+	// printf("\n\nsearching using key: %s\n\n", key);
 	temp = data->table[key[0] % 128];
 	while (temp != NULL)
 	{
@@ -119,6 +120,7 @@ int	ft_add_table(t_data *data, char *key, char *value)
 // 			data->table[i] = temp;
 // 		}
 // 	}
+// 	free(data->table);
 // 	track = 0;
 // 	while (data->command != NULL && data->command[track] != NULL)
 // 		free(data->command[track++]);

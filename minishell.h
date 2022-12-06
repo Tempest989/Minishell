@@ -26,6 +26,7 @@ typedef struct s_data
 	int		*pipe_locale;
 	int		in_out_fd[6];
 	int		command_num;
+	int		initial_commands;
 	t_list	**table;
 	// struct sigaction	old[3];
 	// struct sigaction	new[2];

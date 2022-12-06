@@ -23,11 +23,11 @@ int	ft_arrow_loop(t_data *data, char *first, char *second, int flag)
 		{
 			if ((flag == 1 && data->in_out_fd[2] != -1) || data->in_out_fd[3] != -1)
 			{
-				if (flag == 1)
-					dprintf(2, "left");
-				else
-					dprintf(2, "right");
-				dprintf(2, " double error track = %d\n", track);
+				// if (flag == 1)
+				// 	dprintf(2, "left");
+				// else
+				// 	dprintf(2, "right");
+				// dprintf(2, " double error track = %d\n", track);
 				return (0);
 			}
 			if (flag == 1)
@@ -36,12 +36,12 @@ int	ft_arrow_loop(t_data *data, char *first, char *second, int flag)
 				data->in_out_fd[3] = track;
 			if (data->pipe_locale != NULL && ((flag == 1 && track > data->pipe_locale[0]) || (flag != 1 && track < data->pipe_locale[data->is_pipe - 1])))
 			{
-				if (flag == 1)
-					dprintf(2, "left");
-				else
-					dprintf(2, "right");
-				dprintf(2, " arrow after pipe\n");
-				dprintf(2, "pipe_locale = %d, track = %d\n", data->pipe_locale[0], track);
+				// if (flag == 1)
+				// 	dprintf(2, "left");
+				// else
+				// 	dprintf(2, "right");
+				// dprintf(2, " arrow after pipe\n");
+				// dprintf(2, "pipe_locale = %d, track = %d\n", data->pipe_locale[0], track);
 				return (0);
 			}
 		}
@@ -64,7 +64,7 @@ int	ft_left_arrows(t_data *data)
 		data->in_out_fd[0] = open(data->command[data->in_out_fd[2] + 1], O_RDONLY);
 		if (data->in_out_fd[0] == -1)
 			ft_data_destructor(data, -1, NULL);
-		dprintf(2, "str = %s\n", data->command[data->in_out_fd[2]]);
+		// dprintf(2, "str = %s\n", data->command[data->in_out_fd[2]]);
 	}
 	else
 	{
@@ -74,7 +74,7 @@ int	ft_left_arrows(t_data *data)
 		// 	dprintf(2, "open errro >\n");
 		// 	return (-2);
 		// }
-		dprintf(2, "str = %s\n", data->command[data->in_out_fd[2]]);
+		// dprintf(2, "str = %s\n", data->command[data->in_out_fd[2]]);
 		if (ft_double_left_arrow(data) < 0)
 		{
 			dprintf(2, "double left doing error\n");
@@ -150,17 +150,25 @@ int	ft_analyse_input(t_data *data)
 	int	check;
 
 	check = ft_environ_checks(data, NULL);
+	// printf("performing eviron check.....\n");
 	if (check != 0)
 		return (check);
+	// printf("passed environ check!!\n");
 	check = ft_pipe_checks(data);
+	// printf("performing pipe checks....\n");
 	if (check <= 0)
 		return (check);
+	// printf("passed pipe checks!!\n");
 	check = ft_left_arrows(data);
+	// printf("performing left arrow checks....\n");
 	if (check <= 0)
 		return (check);
+	// printf("passed left arrow checks!!\n");
 	check = ft_right_arrows(data);
+	// printf("performing right arrow checks....\n");
 	if (check <= 0)
 		return (check);
+	// printf("passed right arrow checks!!\n");
 	if (data->in_out_fd[0] != -1 && dup2(data->in_out_fd[0], 0) < 0)
 		ft_data_destructor(data, -1, NULL);
 	if (data->in_out_fd[1] != -1 && dup2(data->in_out_fd[1], 1) < 0)
@@ -179,7 +187,7 @@ int	ft_analyse_input(t_data *data)
 	// {
 	// 	printf("testing\n");
 	// }
-	return (1);
+	return (0);
 }
 
 int	ft_reading(t_data *data)
@@ -230,10 +238,11 @@ int	ft_reading(t_data *data)
 		return (-1);
 	}
 	data->command_num = ft_split(data, line);
+	data->initial_commands = data->command_num;
 	add_history(line);
 	free(line);
 	int check = ft_analyse_input(data);
-	if (check == 0)
+	if (check > 0)
 	{
 		dprintf(2, "warning: invalid input, please try again\n");
 		return (0);

@@ -13,13 +13,13 @@ void	ft_data_destructor(t_data *data, int flag, char *message)
 			t_list *temp = data->table[i]->next;
 			free(data->table[i]->key);
 			free(data->table[i]->value);
-			temp = data->table[i]->next;
 			free(data->table[i]);
 			data->table[i] = temp;
 		}
 	}
+	free(data->table);
 	track = 0;
-	while (data->command != NULL && data->command[track] != NULL)
+	while (track < data->initial_commands && data->command != NULL && data->command[track] != NULL)
 		free(data->command[track++]);
 	if (data->command != NULL)
 		free(data->command);
